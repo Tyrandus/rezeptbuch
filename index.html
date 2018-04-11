@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Rezeptbuch</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.10/css/all.css" integrity="sha384-+d0P83n9kaQMCwj8F4RJB66tzIwOKmrdb46+porD/OvrJ+37WqIM7UoBtwHO6Nlg"
+    crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Bree+Serif" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <section id="app">
+    <header class="file-actions container d-flex justify-content-center align-items-center">
+      <input type="file" name="upload-input" id="upload-input" @change="onFileInputChanged">
+      <label for="upload-input" class="btn btn-light d-block">
+        <i class="fas fa-folder-open fa-lg"></i> Bestehendes Rezeptbuch laden
+      </label>
+      <button class="btn btn-info" @click="downloadRecipes">
+        <i class="fas fa-save fa-lg"></i> Rezeptbuch speichern
+      </button>
+      <button class="btn btn-info" @click="addRecipe">
+        <i class="fas fa-plus fa-lg"></i> Rezept aufnehmen
+      </button>
+
+      <label class="btn btn-light edit-mode">
+        <input class="form-control edit-mode--checkbox" type="checkbox" v-model="editMode" />
+        <i class="fas fa-pen-square fa-lg" v-if="editMode"></i><i v-else class="fas fa-eye fa-lg"></i>
+        {{ editMode ? "Bearbeitungsmodus" : "Vorschaumodus" }}
+      </label>
+    </header>
+
+    <section class="recipe-list container">
+      <nav class="categories">
+        <a class="btn" @click="toggleActiveCategory(category)"
+           v-bind:class="{ active: isActiveCategory(category), category: true }"
+           v-for="category in categories">
+          {{ category }}
+        </a>
+      </nav>
+      <ul class="container recipes">
+        <li v-for="(recipe, index) in filteredRecipes" @click="toggleActiveRecipe(recipe)"
+          v-bind:class="{ active: isActiveRecipe(recipe), recipe: true}">
+          <h4>{{ recipe.title }}</h4>
+          <p>{{ recipe.description }}</p>
+          <button class="btn btn-info delete-recipe" @click="deleteRecipe(recipes.indexOf(recipe))">
+            <i class="fas fa-trash fa-lg"></i>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <section v-if="!isRecipeSelected" class="detail container recipe--placeholder">
+      <i class="fas fa-glass-martini  fa-5x   placeholder--icon"></i>
+      <i class="fas fa-utensils       fa-10x  placeholder--icon"></i>
+      <i class="fas fa-coffee         fa-5x   placeholder--icon"></i>
+    </section>
+
+    <main v-if="isRecipeSelected" v-show="isRecipeSelected" class="detail container">
+      <section v-if="!editMode" class="detail-view">
+        <h1>{{ activeRecipe.title }}</h1>
+        <p>
+          {{ activeRecipe.description }} <br/>
+          Ein {{ activeRecipe.vegetarian ? "vegetarisches " : ""}}
+          Rezept für {{ activeRecipe.portions }} Portion(en).
+        </p>
+
+        <h2>Zutaten</h2>
+        <ul class="ingredient-list">
+          <li v-for="ingredient in activeRecipe.ingredients">
+            {{ ingredient.amount }} {{ ingredient.unit }} {{ ingredient.name }}
+          </li>
+        </ul>
+
+        <h2>Zubereitung</h2>
+        <ol class="preparation-steps">
+          <li v-for="step in activeRecipe.preparation">
+            {{ step.description }}
+          </li>
+        </ol>
+      </section>
+
+      <section v-else class="edit-view">
+        <div class="input-group mb-3">
+          <input class="form-control" type="text" v-model="activeRecipe.title" placeholder="Rezepttitel"/>
+          <div class="input-group-append">
+            <label class="input-group-text">Rezepttitel</label>
+          </div>
+        </div>
+
+        <div class="input-group mb-3">
+          <textarea class="form-control" v-model="activeRecipe.description"
+            placeholder="Beschreibung"></textarea>
+          <div class="input-group-append">
+            <label class="input-group-text">Beschreibung</label>
+          </div>
+        </div>
+
+        <div class="input-group mb-3">
+          <input class="form-control" type="text" v-model="activeRecipe.portions" placeholder="Portionen"/>
+          <div class="input-group-append">
+            <label class="input-group-text">Portionen</label>
+          </div>
+        </div>
+
+        <div class="input-group mb-3">
+          <input class="form-control" type="text" v-model="activeRecipe.category" placeholder="Kategorie" />
+          <div class="input-group-append">
+            <label class="input-group-text">Kategorie</label>
+          </div>
+        </div>
+
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <div class="input-group-text">
+              <input v-model="activeRecipe.vegetarian" type="checkbox" id="vegetarian" />
+            </div>
+          </div>
+          <div class="input-group-append">
+            <label class="input-group-text" for="vegetarian">Vegetarisch</label>
+          </div>
+        </div>
+
+        <h4 class="section-headline">Zutaten</h4>
+        <ul class="ingredients">
+          <li v-for="(ingredient, index) in activeRecipe.ingredients" v-bind:data-index="index">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <button class="input-group-text" @click="moveIngredient(index, -1)">
+                  <i class="fas fa-sort-up"></i>
+                </button>
+              </div>
+              <input class="form-control" type="text" v-model="ingredient.amount" placeholder="Anzahl" />
+              <input class="form-control" type="text" v-model="ingredient.unit" placeholder="Einheit" />
+              <input class="form-control" type="text" v-model="ingredient.name" placeholder="Name"/>
+              <div class="input-group-append">
+                <button class="input-group-text" @click="removeIngredient(index)" @keyup.tab="addIngredient">Löschen</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+        <button @click="addIngredient" class="btn btn-info">Zutat hinzufügen</button>
+
+        <h4 class="section-headline">Zubereitung</h4>
+        <ol class="preparation">
+          <li v-for="(step, index) in activeRecipe.preparation" v-bind:data-index="index">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <button class="input-group-text" @click="moveStep(index, -1)">
+                  <i class="fas fa-sort-up"></i>
+                </button>
+              </div>
+              <input class="form-control" type="text" placeholder="Zubereitungsschritt" v-model="step.description" />
+              <div class="input-group-append">
+                <button class="input-group-text" @click="removeStep(index)" @keyup.tab="addStep">Löschen</button>
+              </div>
+            </div>
+          </li>
+        </ol>
+        <button @click="addStep" class="btn btn-info">Zubereitungsschritt hinzufügen</button>
+      </section>
+
+    </main>
+  </section>
+
+  <script src="./js/vue.js"></script>
+  <script src="./js/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# VS Code workspace file
+workspace.code-workspace
+
+# Print build script
+build/*
+
+# Test data folder
+data/*
