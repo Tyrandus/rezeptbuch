@@ -31,8 +31,7 @@ function wrapInItemize (string) {
     return ''
   } else {
     return `
-      \\begin{itemize}
-      ${string}
+      \\begin{itemize}[noitemsep]${string}
       \\end{itemize}
     `
   }
