@@ -3,3 +3,7 @@ workspace.code-workspace
 
 # Test data folder
 data/*
+
+# Build files
+build/node_modules/
+build/out/*
