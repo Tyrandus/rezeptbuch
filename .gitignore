@@ -6,4 +6,3 @@ data/*
 
 # Build files
 build/node_modules/
-build/out/*
