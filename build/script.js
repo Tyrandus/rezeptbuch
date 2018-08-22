@@ -83,7 +83,7 @@ function recipeToHtml (recipe, index) {
         </span>
       </p>
 
-      <h2 class="ingredients--title">Zutaten</h2>
+      <h3 class="ingredients--title">Zutaten</h3>
       <ul class="ingredients--list">
         ${recipe.ingredients.map(ingredient => `
           <li class="ingredients--list-item">
@@ -92,12 +92,14 @@ function recipeToHtml (recipe, index) {
         `).join('')}
       </ul>
 
-      <h2 class="preparation--title">Zubereitung</h2>
+      ${(recipe.preparation.length > 0) ? `
+      <h3 class="preparation--title">Zubereitung</h3>
       <ul class="preparation--list">
         ${recipe.preparation.map(step => `
           <li class="preparation--list-item">${step.description}</li>
         `).join('')}
       </ul>
+      ` : ''}
     </section>
     <hr/>
   `
