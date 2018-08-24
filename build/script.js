@@ -69,18 +69,7 @@ function recipeToTex (recipe) {
 function recipeToHtml (recipe, index) {
   return `
     <section class="recipe">
-      <p class="page--number">${index + 1}</p>
       <h1 class="recipe--title">${recipe.title}</h1>
-      <p class="recipe--description">
-        <span class="recipe--description-text">
-          ${recipe.description}
-        </span>
-        <br/>
-        <span class="recipe--vegetarian-info">
-          Ein ${recipe.vegetarian ? 'vegetarisches ' : ''}
-          Rezept für ${recipe.portions} Portion(en).
-        </span>
-      </p>
 
       <h3 class="ingredients--title">Zutaten</h3>
       <ul class="ingredients--list">

@@ -40,6 +40,10 @@
     text-align: center;
   }
 
+  .ingredients--list {
+    list-style-type: none;
+  }
+
   @media print {
     body {
       column-count: 1;
@@ -60,6 +64,10 @@
     }
   }
 
+  @page {
+    margin: calc((100vh - 18cm) / 2) calc((100vw - 12cm) / 2)
+  }
+
   @media screen {
     * {
       padding: 0;
@@ -77,10 +85,6 @@
 
     .recipe--title {
       margin-bottom: 1rem;
-    }
-
-    .ingredients--list {
-      list-style-type: none;
     }
 
     .ingredients--title,
